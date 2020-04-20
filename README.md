@@ -98,7 +98,7 @@ Enter MFA code for arn:aws:iam::1234567890:mfa/USERNAME:
 Run awsswitch command in your terminal.
 
 ```console
-% $(awsswitch --profile=USERNAME_administrator)
+% eval $(awsswitch --profile=USERNAME_administrator)
 Enter MFA code:
 you got a valid token until 2020-04-19 21:43:38 +0000 UTC
 ```
