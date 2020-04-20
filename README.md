@@ -1,6 +1,6 @@
 # awsswitch
 
-This is a command to export the credentials variables to switch a role with MFA code.
+This is a command to export the credentials variables to switch a role with MFA.
 
 
 ## Getting Started
@@ -12,22 +12,10 @@ Install awsswitch.
 go get github.com/int128/awsswitch
 ```
 
-### Set up a user
-
-Create an IAM user on AWS management console.
-You do not need to attach any IAM policy.
-
-Set your credentials to `~/.aws/credentials`.
-
-```console
-% aws configure --profile=USERNAME
-```
-
 ### Set up a role to switch
 
-Create an IAM role on AWS management console.
-You need to set up an assume role.
-See [document](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_permissions-to-switch.html) for more.
+Create an IAM role.
+You need to set up a trusted relationship.
 
 ```json
 {
@@ -36,7 +24,7 @@ See [document](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_per
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "arn:aws:iam::1234567890:user/USERNAME"
+        "AWS": "arn:aws:iam::1234567890:root"
       },
       "Action": "sts:AssumeRole",
       "Condition": {
@@ -47,6 +35,30 @@ See [document](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_per
     }
   ]
 }
+```
+
+### Set up a user
+
+Create an IAM user.
+
+You need to set up an assume role.
+See [document](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_permissions-to-switch.html) for more.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": {
+    "Effect": "Allow",
+    "Action": "sts:AssumeRole",
+    "Resource": "arn:aws:iam::1234567890:role/AdministratorMFA"
+  }
+}
+```
+
+Set your credentials to `~/.aws/credentials`.
+
+```console
+% aws configure --profile=USERNAME
 ```
 
 Add a profile to `.aws/config` to switch a role.
@@ -63,11 +75,20 @@ duration_seconds = 43200
 
 ### Switch a role
 
-You can export `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN`.
+Run awsswitch command in your terminal.
 
 ```console
-% export AWS_PROFILE=YOURNAME
-% eval $(awsswitch)
+% $(awsswitch --profile=USERNAME_administrator)
+Enter MFA code:
+you got a valid token until 2020-04-19 21:43:38 +0000 UTC
+```
+
+It will export `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN`.
+
+Now you can run tools such as AWS CLI, Terraform and Ansible.
+
+```console
+% terraform apply
 ```
 
 
