@@ -2,6 +2,12 @@
 
 This is a command to export the credentials variables to switch a role with MFA.
 
+Key features:
+
+- Single binary
+- Interoperable config with AWS CLI
+- In-memory credentials (do not write to a file)
+
 
 ## Getting Started
 
@@ -19,7 +25,7 @@ unzip awsswitch_linux_amd64.zip
 go get github.com/int128/awsswitch
 ```
 
-### Set up a role to switch
+### 1. Set up a role to switch
 
 Create an IAM role.
 You need to set up a trusted relationship.
@@ -44,7 +50,7 @@ You need to set up a trusted relationship.
 }
 ```
 
-### Set up a user
+### 2. Set up a user
 
 Create an IAM user.
 
@@ -70,7 +76,7 @@ Set your credentials to `~/.aws/credentials`.
 
 Add a profile to `.aws/config` to switch a role.
 
-```
+```ini
 [profile USERNAME]
 
 [profile USERNAME_administrator]
@@ -80,7 +86,14 @@ source_profile = USERNAME
 duration_seconds = 43200
 ```
 
-### Switch a role
+You can run AWS CLI but still you cannot run other tools such as Terraform.
+
+```console
+% aws s3 ls
+Enter MFA code for arn:aws:iam::1234567890:mfa/USERNAME:
+```
+
+### 3. Switch a role
 
 Run awsswitch command in your terminal.
 
@@ -92,9 +105,11 @@ you got a valid token until 2020-04-19 21:43:38 +0000 UTC
 
 It will export `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN`.
 
-Now you can run tools such as AWS CLI, Terraform and Ansible.
+Now you can run tools such as AWS CLI and Terraform.
 
 ```console
+% aws s3 ls
+
 % terraform apply
 ```
 
