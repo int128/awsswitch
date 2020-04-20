@@ -1,4 +1,4 @@
-# awsswitch
+# awsswitch [![CircleCI](https://circleci.com/gh/int128/awsswitch.svg?style=shield)](https://circleci.com/gh/int128/awsswitch)
 
 This is a command to export the credentials variables to switch a role with MFA.
 
@@ -8,6 +8,13 @@ This is a command to export the credentials variables to switch a role with MFA.
 Install awsswitch.
 
 ```sh
+# Homebrew (macOS)
+brew install int128/awsswitch/awsswitch
+
+# GitHub Releases
+curl -LO https://github.com/int128/awsswitch/releases/download/v0.1.0/awsswitch_linux_amd64.zip
+unzip awsswitch_linux_amd64.zip
+
 # Go
 go get github.com/int128/awsswitch
 ```
