@@ -5,8 +5,8 @@ This is a command to export the credentials variables to switch a role with MFA.
 Key features:
 
 - Single binary
-- Interoperable config with AWS CLI
-- In-memory credentials (do not write to a file)
+- Interoperable config with AWS CLI (`~/.aws/config`)
+- Interoperable token cache with AWS CLI (`~/.aws/cli/cache`)
 
 
 ## Getting Started
