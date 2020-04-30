@@ -25,10 +25,46 @@ unzip awsswitch_linux_amd64.zip
 go get github.com/int128/awsswitch
 ```
 
-### 1. Set up a role to switch
+Set up your `.aws/config` for the switch role. For example,
 
-Create an IAM role.
-You need to set up a trusted relationship.
+```ini
+[profile USERNAME]
+
+[profile USERNAME_administrator]
+mfa_serial = arn:aws:iam::1234567890:mfa/USERNAME
+role_arn = arn:aws:iam::1234567890:role/AdministratorMFA
+source_profile = USERNAME
+duration_seconds = 43200
+```
+
+Run the command in your terminal.
+
+```console
+% eval $(awsswitch --profile=USERNAME_administrator)
+Enter MFA code:
+you got a valid token until 2020-04-19 21:43:38 +0000 UTC
+```
+
+It will export `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN`.
+Now you can run tools such as AWS CLI and Terraform.
+
+```console
+% aws s3 ls
+
+% terraform apply
+```
+
+It attempts to read the token cache in `~/.aws/cli/cache`.
+You do not need to enter a MFA code if the token is valid.
+This behavior is interoperable with AWS CLI.
+
+
+## How to set up the switch role
+
+### 1. Set up a role
+
+Create an IAM role to switch to.
+You need to set up a trusted relationship to an AWS account or IAM user.
 
 ```json
 {
@@ -74,7 +110,7 @@ Set your credentials to `~/.aws/credentials`.
 % aws configure --profile=USERNAME
 ```
 
-Add a profile to `.aws/config` to switch a role.
+Add a profile to `.aws/config` to switch to the role.
 
 ```ini
 [profile USERNAME]
@@ -84,33 +120,6 @@ mfa_serial = arn:aws:iam::1234567890:mfa/USERNAME
 role_arn = arn:aws:iam::1234567890:role/AdministratorMFA
 source_profile = USERNAME
 duration_seconds = 43200
-```
-
-You can run AWS CLI but still you cannot run other tools such as Terraform.
-
-```console
-% aws s3 ls
-Enter MFA code for arn:aws:iam::1234567890:mfa/USERNAME:
-```
-
-### 3. Switch a role
-
-Run awsswitch command in your terminal.
-
-```console
-% eval $(awsswitch --profile=USERNAME_administrator)
-Enter MFA code:
-you got a valid token until 2020-04-19 21:43:38 +0000 UTC
-```
-
-It will export `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN`.
-
-Now you can run tools such as AWS CLI and Terraform.
-
-```console
-% aws s3 ls
-
-% terraform apply
 ```
 
 
