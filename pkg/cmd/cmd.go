@@ -8,16 +8,13 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"syscall"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/endpoints"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
+	"github.com/int128/awsswitch/pkg/prompt"
 	"github.com/int128/awsswitch/pkg/tokencache"
-	"golang.org/x/crypto/ssh/terminal"
 )
-
-const mfaCodePrompt = "Enter MFA code: "
 
 type options struct {
 	profile string
@@ -50,7 +47,9 @@ func getCredentials(ctx context.Context, profile string) (*aws.Credentials, erro
 	cfg, err := external.LoadDefaultAWSConfig(
 		external.WithSharedConfigProfile(profile),
 		external.WithRegion(endpoints.UsEast1RegionID),
-		external.WithMFATokenFunc(readMFACode),
+		external.WithMFATokenFunc(func() (string, error) {
+			return prompt.ReadPassword("Enter MFA code: ")
+		}),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("cannot load AWS config: %w", err)
@@ -92,18 +91,4 @@ func findSharedConfig(cfg aws.Config) *external.SharedConfig {
 		}
 	}
 	return nil
-}
-
-func readMFACode() (string, error) {
-	if _, err := fmt.Fprint(os.Stderr, mfaCodePrompt); err != nil {
-		return "", fmt.Errorf("cannot write to stderr: %w", err)
-	}
-	b, err := terminal.ReadPassword(int(syscall.Stdin))
-	if err != nil {
-		return "", fmt.Errorf("cannot read from stdin: %w", err)
-	}
-	if _, err := fmt.Fprintln(os.Stderr); err != nil {
-		return "", fmt.Errorf("cannot write to stderr: %w", err)
-	}
-	return string(b), nil
 }
