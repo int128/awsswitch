@@ -1,6 +1,10 @@
 # awsswitch [![CircleCI](https://circleci.com/gh/int128/awsswitch.svg?style=shield)](https://circleci.com/gh/int128/awsswitch)
 
-This is a command to export the credentials variables to switch a role with MFA.
+This is a command to export the following credentials variables to switch a role with MFA.
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_SESSION_TOKEN`
 
 Key features:
 
@@ -18,14 +22,14 @@ Install awsswitch.
 brew install int128/awsswitch/awsswitch
 
 # GitHub Releases
-curl -LO https://github.com/int128/awsswitch/releases/download/v0.1.0/awsswitch_linux_amd64.zip
+curl -LO https://github.com/int128/awsswitch/releases/download/v0.2.0/awsswitch_linux_amd64.zip
 unzip awsswitch_linux_amd64.zip
 
 # Go
 go get github.com/int128/awsswitch
 ```
 
-Set up your `.aws/config` for the switch role. For example,
+Set up your `.aws/config` to switch a role. For example,
 
 ```ini
 [profile USERNAME]
@@ -45,7 +49,7 @@ Enter MFA code:
 you got a valid token until 2020-04-19 21:43:38 +0000 UTC
 ```
 
-It will export `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN`.
+It will export the credentials variables.
 Now you can run tools such as AWS CLI and Terraform.
 
 ```console
@@ -59,7 +63,7 @@ You do not need to enter a MFA code if the token is valid.
 This behavior is interoperable with AWS CLI.
 
 
-## How to set up the switch role
+## How to set up the role switching
 
 ### 1. Set up a role
 
