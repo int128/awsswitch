@@ -54,18 +54,26 @@ func getCredentials(ctx context.Context, profile string) (*aws.Credentials, erro
 	if err != nil {
 		return nil, fmt.Errorf("cannot load AWS config: %w", err)
 	}
-
-	sc := findSharedConfig(cfg)
-	if sc == nil {
-		credentials, err := cfg.Credentials.Retrieve(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("cannot retrieve credentials: %w", err)
+	for _, cs := range cfg.ConfigSources {
+		if sc, ok := cs.(external.SharedConfig); ok {
+			credentials, err := getCredentialsUsingSharedConfig(ctx, cfg, sc)
+			if err != nil {
+				log.Printf("skipped the config: %s", err)
+				continue
+			}
+			return credentials, err
 		}
-		log.Printf("you got a valid token until %s", credentials.Expires)
-		return &credentials, nil
 	}
+	credentials, err := cfg.Credentials.Retrieve(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("cannot retrieve credentials from aws: %w", err)
+	}
+	log.Printf("you got a valid token until %s", credentials.Expires)
+	return &credentials, nil
+}
 
-	cache, err := tokencache.Load(*sc)
+func getCredentialsUsingSharedConfig(ctx context.Context, cfg aws.Config, sc external.SharedConfig) (*aws.Credentials, error) {
+	cache, err := tokencache.Load(sc)
 	if err == nil {
 		if !cache.Expired() {
 			log.Printf("you already have a valid token until %s", cache.Expires)
@@ -75,20 +83,11 @@ func getCredentials(ctx context.Context, profile string) (*aws.Credentials, erro
 	}
 	credentials, err := cfg.Credentials.Retrieve(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("cannot retrieve credentials: %w", err)
+		return nil, fmt.Errorf("cannot retrieve credentials from aws: %w", err)
 	}
-	if err := tokencache.Save(*sc, credentials); err != nil {
+	if err := tokencache.Save(sc, credentials); err != nil {
 		return nil, fmt.Errorf("cannot save cache: %w", err)
 	}
 	log.Printf("you got a valid token until %s", credentials.Expires)
 	return &credentials, nil
-}
-
-func findSharedConfig(cfg aws.Config) *external.SharedConfig {
-	for _, cs := range cfg.ConfigSources {
-		if sc, ok := cs.(external.SharedConfig); ok {
-			return &sc
-		}
-	}
-	return nil
 }
